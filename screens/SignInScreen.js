@@ -23,6 +23,10 @@ export default class SignInScreen extends React.Component {
         this.setState({username: ''});
         this.props.navigation.navigate('Auth');
     }
+    
+    async handleNavHome(){
+        this.props.navigation.navigate('App');
+    }
 
     async handleSignIn(){
         let { username, password } = this.state;
@@ -39,7 +43,12 @@ export default class SignInScreen extends React.Component {
     render(){
         if(this.state.username){
             btnText = 'Sign Out ' + this.state.username;
-            return <Button title={btnText} onPress={this.handleSignOut.bind(this)} />
+            return (
+                <View>
+                    <Button title={btnText} onPress={this.handleSignOut.bind(this)} />
+                    <Button title="Back to App" onPress={this.handleNavHome.bind(this)} />
+                </View>
+            )
         }
         return (
             <View>

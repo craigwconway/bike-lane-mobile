@@ -9,14 +9,24 @@ import {
   Button,
   View,
   AsyncStorage,
+  Dimensions,
 } from 'react-native';
 
-import { MonoText } from '../components/StyledText';
+import MapView, { Marker } from 'react-native-maps';
+
 
 export default class HomeScreen extends React.Component {
 
   state = {
-    username: ''
+    username: '',
+    markers: [
+      {
+        id: 'abc',
+        latlng: {latitude: 37.772083, longitude: -122.453444},
+        title: 'Glass',
+        description: 'in the bike lane'
+      }
+    ]
   }
 
   componentDidMount(){
@@ -36,32 +46,40 @@ export default class HomeScreen extends React.Component {
   render(){
     return (
       <View style={styles.container}>
-        <ScrollView
-          style={styles.container}
-          contentContainerStyle={styles.contentContainer}>
-          <View style={styles.welcomeContainer}>
-            <Image
-              source={
-                __DEV__
-                  ? require('../assets/images/robot-dev.png')
-                  : require('../assets/images/robot-prod.png')
-              }
-              style={styles.welcomeImage}
-            />
-          </View>
 
           <View style={styles.getStartedContainer}>
-            <DevelopmentModeNotice />
 
             <Text style={styles.getStartedText}>Welcome {this.state.username}</Text>
 
-            
-            <Button 
-              title='Create Report' 
-              onPress={this.handleCreateReport.bind(this)} />
+            <DevelopmentModeNotice />
+
+            <MapView 
+                style={styles.mapStyle}
+                initialRegion={{
+                  latitude: 37.772083,
+                  longitude: -122.453444,
+                  latitudeDelta: 0.0922,
+                  longitudeDelta: 0.0421,
+                }}
+                >
+
+              {this.state.markers.map(marker => (
+                <Marker
+                  key={marker.id}
+                  coordinate={marker.latlng}
+                  title={marker.title}
+                  description={marker.description}
+                />
+              ))}
+
+              <Button 
+                title='Create Report' 
+                onPress={this.handleCreateReport.bind(this)} />
+
+            </MapView>
+
           </View>
 
-        </ScrollView>
 
       </View>
     );
@@ -87,6 +105,10 @@ function DevelopmentModeNotice() {
 }
 
 const styles = StyleSheet.create({
+  mapStyle: {
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
