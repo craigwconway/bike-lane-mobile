@@ -1,160 +1,163 @@
-import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
 import {
-  Image,
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
   Button,
   View,
   AsyncStorage,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 
 import MapView, { Marker } from 'react-native-maps';
 
+import Constants from 'expo-constants';
+import * as Location from 'expo-location';
+import * as Permissions from 'expo-permissions';
+
+function initialRegion(){
+  return {
+    latitude: 37.772083,
+    longitude: -122.453444,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  }
+}
+
+function mockMarker(){
+  return {
+    id: (new Date).getTime(),
+    coordinate: {latitude: 37.772083, longitude: -122.453444},
+    title: 'Glass',
+    description: 'in the bike lane'
+  }
+}
+
+if (__DEV__){
+  console.log('########################');
+  console.log('DEVELOPMENT MODE ENABLED');
+  console.log('########################');
+}
 
 export default class HomeScreen extends React.Component {
 
   state = {
     username: '',
-    markers: [
-      {
-        id: 'abc',
-        latlng: {latitude: 37.772083, longitude: -122.453444},
-        title: 'Glass',
-        description: 'in the bike lane'
+    location: 'No Location Data',
+    region: initialRegion(),
+    markers: [],
+    locationEnabled: false,
+  }
+
+  onRegionChange = (region) => {
+    this.setState({ region });
+  }
+
+  componentDidMount() {
+    this.getUsername();
+    this.getLocation();
+  }
+
+  getLocation = async () => {
+    if (Platform.OS === 'android' && !Constants.isDevice) {
+      this.setState({
+        location: 'Location not available on Sketch in Android emulator.',
+      });
+    } else {
+      let { status } = await Permissions.askAsync(Permissions.LOCATION);
+      if (status !== 'granted') {
+        alert('Please allow permission to use Location data.');
+      }else{
+        this.setState({ locationEnabled: true });
       }
-    ]
+      let location = await Location.getCurrentPositionAsync({});
+      let {latitude, longitude} = location['coords'];
+      this.setState({ location: {latitude, longitude} });
+      this.setState({ region: {latitude, longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421} });
+    }
   }
 
-  componentDidMount(){
-    this.getUsername()
-  }
-
-  async getUsername(){
+  getUsername = () => {
     AsyncStorage.getItem('username')
       .then(val => this.setState({username: val}))
       .catch(err => alert(err));
   }
 
-  async handleCreateReport(){
-    alert('Report created!')
+  handleCreateReport = () => {
+    alert('Report created!');
+    let marker = mockMarker();
+    marker['coordinate'] = this.state.location;
+    let markers = this.state.markers;
+    markers.push(marker)
+    this.setState({markers})
   }
 
   render(){
+    let {region, markers, locationEnabled } = this.state;
     return (
       <View style={styles.container}>
 
-          <View style={styles.getStartedContainer}>
+        <MapView 
+            style={styles.map}
+            region={region}
+            >
 
-            <Text style={styles.getStartedText}>Welcome {this.state.username}</Text>
+          {markers.map(marker => (
+            <Marker
+                key={marker.id}
+                coordinate={marker.coordinate}
+                title={marker.title}
+                description={marker.description}
+            />
+          ))}
 
-            <DevelopmentModeNotice />
+        </MapView>
 
-            <MapView 
-                style={styles.mapStyle}
-                initialRegion={{
-                  latitude: 37.772083,
-                  longitude: -122.453444,
-                  latitudeDelta: 0.0922,
-                  longitudeDelta: 0.0421,
-                }}
-                >
-
-              {this.state.markers.map(marker => (
-                <Marker
-                  key={marker.id}
-                  coordinate={marker.latlng}
-                  title={marker.title}
-                  description={marker.description}
-                />
-              ))}
-
-              <Button 
-                title='Create Report' 
-                onPress={this.handleCreateReport.bind(this)} />
-
-            </MapView>
-
-          </View>
-
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            onPress={() => this.handleCreateReport()}
+            style={[styles.button]}
+          >
+            <Text style={styles.buttonText}>Report Glass in the Bike Lane</Text>
+          </TouchableOpacity>
+        </View>
 
       </View>
     );
-  d}
+  }
 }
 
 HomeScreen.navigationOptions = {
   header: null,
 };
 
-function DevelopmentModeNotice() {
-  if (__DEV__) {
-    return (
-      <Text style={styles.developmentModeText}>
-        Development mode is enabled
-      </Text>
-    );
-  } else {
-    return (
-      <Text />
-    );
-  }
-}
-
 const styles = StyleSheet.create({
-  mapStyle: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
-  },
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  developmentModeText: {
-    marginBottom: 20,
-    color: 'rgba(0,0,0,0.4)',
-    fontSize: 14,
-    lineHeight: 19,
-    textAlign: 'center',
-  },
-  contentContainer: {
-    paddingTop: 30,
-  },
-  welcomeContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
+    paddingTop: ( Platform.OS === 'ios' ) ? 30 : 0,
   },
-  welcomeImage: {
-    width: 100,
-    height: 80,
-    resizeMode: 'contain',
-    marginTop: 3,
-    marginLeft: -10,
+  map: {
+    ...StyleSheet.absoluteFillObject,
   },
-  getStartedContainer: {
+  buttonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  button: {
     alignItems: 'center',
-    marginHorizontal: 50,
+    backgroundColor: 'rgba(145,30,30,0.7)',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 20,
   },
-  homeScreenFilename: {
-    marginVertical: 7,
-  },
-  codeHighlightText: {
-    color: 'rgba(96,100,109, 0.8)',
-  },
-  codeHighlightContainer: {
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: 3,
-    paddingHorizontal: 4,
-  },
-  getStartedText: {
-    fontSize: 17,
-    color: 'rgba(96,100,109, 1)',
-    lineHeight: 24,
-    textAlign: 'center',
+  buttonContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    marginBottom: 20,
   },
   tabBarInfoContainer: {
     position: 'absolute',
@@ -180,19 +183,5 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: 'rgba(96,100,109, 1)',
     textAlign: 'center',
-  },
-  navigationFilename: {
-    marginTop: 5,
-  },
-  helpContainer: {
-    marginTop: 15,
-    alignItems: 'center',
-  },
-  helpLink: {
-    paddingVertical: 15,
-  },
-  helpLinkText: {
-    fontSize: 14,
-    color: '#2e78b7',
   },
 });
