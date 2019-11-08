@@ -4,9 +4,8 @@ import { createStackNavigator, createBottomTabNavigator } from 'react-navigation
 
 import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
-import LinksScreen from '../screens/LinksScreen';
+import ReportsScreen from '../screens/ReportsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import SignInScreen from '../screens/SignInScreen';
 
 const config = Platform.select({
   web: { headerMode: 'screen' },
@@ -23,34 +22,28 @@ const HomeStack = createStackNavigator(
 HomeStack.navigationOptions = {
   tabBarLabel: 'Home',
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={
-        Platform.OS === 'ios'
-          ? `ios-information-circle${focused ? '' : '-outline'}`
-          : 'md-information-circle'
-      }
+    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-bicycle' : 'md-bicycle'}
     />
   ),
 };
 
 HomeStack.path = '';
 
-const LinksStack = createStackNavigator(
+const ReportsStack = createStackNavigator(
   {
-    Links: LinksScreen,
+    Links: ReportsScreen,
   },
   config
 );
 
-LinksStack.navigationOptions = {
-  tabBarLabel: 'Links',
+ReportsStack.navigationOptions = {
+  tabBarLabel: 'Reports',
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-link' : 'md-link'} />
+    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-pin' : 'md-pin'} />
   ),
 };
 
-LinksStack.path = '';
+ReportsStack.path = '';
 
 const SettingsStack = createStackNavigator(
   {
@@ -62,41 +55,16 @@ const SettingsStack = createStackNavigator(
 SettingsStack.navigationOptions = {
   tabBarLabel: 'Settings',
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'} />
+    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-contact' : 'md-contact'} />
   ),
 };
 
 SettingsStack.path = '';
 
-
-const SignOutStack = createStackNavigator(
-  {
-    SignOut: SignInScreen,
-  },
-  config
-);
-
-SignOutStack.navigationOptions = {
-  tabBarLabel: 'Sign Out',
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={
-        Platform.OS === 'ios'
-          ? `ios-information-circle${focused ? '' : '-outline'}`
-          : 'md-information-circle'
-      }
-    />
-  ),
-};
-
-SignOutStack.path = '';
-
 const tabNavigator = createBottomTabNavigator({
   HomeStack,
-  LinksStack,
+  ReportsStack,
   SettingsStack,
-  SignOutStack,
 });
 
 tabNavigator.path = '';

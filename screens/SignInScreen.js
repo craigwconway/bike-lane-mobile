@@ -1,11 +1,20 @@
 import React from 'react';
-import { Text, View, TextInput, Button, AsyncStorage } from 'react-native';
+import { Text, View, TextInput, Button } from 'react-native';
+
+import StateService from '../services/StateService'
 
 export default class SignInScreen extends React.Component {
-    state = {
+
+    initialState = () => {
+      return {
         username: '',
         password: '',
+        }   
     }
+
+    state = this.initialState();
+
+    resetState = () => this.setState(this.initialState());
 
     componentDidMount(){
         this.getUsername();
@@ -13,17 +22,16 @@ export default class SignInScreen extends React.Component {
     }
 
     async getUsername(){
-      AsyncStorage.getItem('username')
-        .then(val => this.setState({username: val}))
-        .catch(err => alert(err));
+        let username = await StateService.get('username');
+        this.setState({username});
     }
 
     async handleSignOut(){
-        await AsyncStorage.clear();
-        this.setState({username: ''});
+        await StateService.clear();
+        this.resetState();
         this.props.navigation.navigate('Auth');
     }
-    
+
     async handleNavHome(){
         this.props.navigation.navigate('App');
     }
@@ -35,8 +43,8 @@ export default class SignInScreen extends React.Component {
             alert('Username and password are required!')
             return false;
         }
-        console.log('handleSignIn: ' + username + ' ' + password);
-        await AsyncStorage.setItem('username', username);
+        console.log('handleSignIn: ' + username );
+        await StateService.set('username', username);
         this.props.navigation.navigate('App');
     }
 

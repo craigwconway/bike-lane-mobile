@@ -3,10 +3,7 @@ import {
   Platform,
   StyleSheet,
   Text,
-  Button,
   View,
-  AsyncStorage,
-  Dimensions,
   TouchableOpacity,
 } from 'react-native';
 
@@ -16,46 +13,27 @@ import Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 
-function initialRegion(){
-  return {
-    latitude: 37.772083,
-    longitude: -122.453444,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  }
-}
-
-function mockMarker(){
-  return {
-    id: (new Date).getTime(),
-    coordinate: {latitude: 37.772083, longitude: -122.453444},
-    title: 'Glass',
-    description: 'in the bike lane'
-  }
-}
-
-if (__DEV__){
-  console.log('########################');
-  console.log('DEVELOPMENT MODE ENABLED');
-  console.log('########################');
-}
 
 export default class HomeScreen extends React.Component {
+
+  initialRegion = () => {
+    return {
+      latitude: 37.772083,
+      longitude: -122.453444,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    }
+  }
 
   state = {
     username: '',
     location: 'No Location Data',
-    region: initialRegion(),
+    region: this.initialRegion(),
     markers: [],
     locationEnabled: false,
   }
 
-  onRegionChange = (region) => {
-    this.setState({ region });
-  }
-
   componentDidMount() {
-    this.getUsername();
     this.getLocation();
   }
 
@@ -74,14 +52,8 @@ export default class HomeScreen extends React.Component {
       let location = await Location.getCurrentPositionAsync({});
       let {latitude, longitude} = location['coords'];
       this.setState({ location: {latitude, longitude} });
-      this.setState({ region: {latitude, longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421} });
+      this.setState({ region: {latitude, longitude, latitudeDelta: 0.001, longitudeDelta: 0.001} });
     }
-  }
-
-  getUsername = () => {
-    AsyncStorage.getItem('username')
-      .then(val => this.setState({username: val}))
-      .catch(err => alert(err));
   }
 
   handleCreateReport = () => {
@@ -119,7 +91,7 @@ export default class HomeScreen extends React.Component {
             onPress={() => this.handleCreateReport()}
             style={[styles.button]}
           >
-            <Text style={styles.buttonText}>Report Glass in the Bike Lane</Text>
+            <Text style={styles.buttonText}>Glass in the Bike Lane!</Text>
           </TouchableOpacity>
         </View>
 
@@ -137,7 +109,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'flex-end',
     alignItems: 'center',
-    paddingTop: ( Platform.OS === 'ios' ) ? 30 : 0,
   },
   map: {
     ...StyleSheet.absoluteFillObject,
@@ -157,31 +128,6 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     backgroundColor: 'transparent',
-    marginBottom: 20,
-  },
-  tabBarInfoContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    ...Platform.select({
-      ios: {
-        shadowColor: 'black',
-        shadowOffset: { width: 0, height: -3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-      },
-      android: {
-        elevation: 20,
-      },
-    }),
-    alignItems: 'center',
-    backgroundColor: '#fbfbfb',
-    paddingVertical: 20,
-  },
-  tabBarInfoText: {
-    fontSize: 17,
-    color: 'rgba(96,100,109, 1)',
-    textAlign: 'center',
+    marginBottom: 30,
   },
 });

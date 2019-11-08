@@ -7,6 +7,12 @@ import { Ionicons } from '@expo/vector-icons';
 
 import AppNavigator from './navigation/AppNavigator';
 
+if (__DEV__){
+  console.log('########################');
+  console.log('DEVELOPMENT MODE ENABLED');
+  console.log('########################');
+}
+
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
 
