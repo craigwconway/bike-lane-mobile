@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, View, TextInput, Button } from 'react-native';
+import { View } from 'react-native';
+import { Button, CheckBox, Input, Text, ThemeProvider } from 'react-native-elements';
 
 import StateService from '../services/StateService'
 
@@ -51,44 +52,44 @@ export default class SignInScreen extends React.Component {
     render(){
         if(this.state.username){
             btnText = 'Sign Out ' + this.state.username;
-            return (
-                <View>
-                    <Button title={btnText} onPress={this.handleSignOut.bind(this)} />
-                    <Button title="Back to App" onPress={this.handleNavHome.bind(this)} />
-                </View>
-            )
+            return <Button title="Back to App" onPress={this.handleNavHome.bind(this)} />
         }
         return (
-            <View>
-                <Text>Sign In</Text>
-                <TextInput 
+            <View style={{margin: 20}}>
+                <Text h4 style={{marginBottom: 20, textAlign: 'center'}}>Sign In</Text>
+                <Input 
                     autoCapitalize='none'
                     autoCompleteType='off'
                     autoCorrect={false}
-                    autoFocus={true}
+                    autoFocus={true} 
                     placeholder='Username'
                     placeholderTextColor='gray'
-                    style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+                    style={{ marginBottom: 20 }}
                     onChangeText={(val) => this.state.username = val}
                     spellCheck={false}
                     textContentType='emailAddress'
                     />
-                <TextInput 
+                <Input 
                     autoCapitalize='none'
                     autoCompleteType='off'
                     autoCorrect={false}
                     placeholder='Password'
                     placeholderTextColor='gray'
-                    style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+                    style={{ marginBottom: 20 }}
                     onChangeText={(val) => this.state.password = val}
                     secureTextEntry={true}
                     spellCheck={false}
                     />
                 <Button 
                     title='Sign In' 
-                    onPress={this.handleSignIn.bind(this)} />
+                    onPress={this.handleSignIn.bind(this)} 
+                    buttonStyle={{marginTop: 30}}/>
             </View>
         )
     }
 
 }
+
+SignInScreen.navigationOptions = {
+  title: 'Glass in the Bike Lane',
+};
