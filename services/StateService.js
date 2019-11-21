@@ -1,29 +1,13 @@
 
 import { AsyncStorage } from "react-native";
 
-module.exports = {
-    get (key) {
-        return AsyncStorage.getItem(key)
-            .catch(err => {
-                throw new Error(`${err}`);
-            });
-    },
-    set (key, value) {
-        return AsyncStorage.setItem(key, value)
-            .catch(err => {
-                throw new Error(`${err}`);
-            });
-    },
-    del (key) {
-        return AsyncStorage.removeItem(key)
-            .catch(err => {
-                throw new Error(`${err}`);
-            });
-    },
-    clear () {
-        return AsyncStorage.clear()
-            .catch(err => {
-                throw new Error(`${err}`);
-            });
-    }
-};
+export default class StateService {
+    
+    static get = async key => await AsyncStorage.getItem(key)
+
+    static set = async (key, value) => await AsyncStorage.setItem(key, value)
+
+    static del = async key => await AsyncStorage.removeItem(key)
+
+    static clear = async () => await AsyncStorage.clear()
+}
