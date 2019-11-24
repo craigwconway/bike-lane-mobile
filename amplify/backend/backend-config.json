@@ -1,0 +1,9 @@
+{
+	"auth": {
+		"glassinthebikelane85180e7b": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": []
+		}
+	}
+}
