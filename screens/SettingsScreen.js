@@ -4,29 +4,40 @@ import { Button, CheckBox, Text, ThemeProvider } from "react-native-elements";
 
 import { Auth } from "aws-amplify";
 
-import StateService from "../services/StateService";
+import { FetchService } from "../services/FetchService";
 
 export default class SettingsScreen extends React.Component {
   state = {
-    user: {},
+    username: "",
+    email: "",
     notify_updates: true,
     notify_following: true,
     notify_new: true
   };
 
   async componentDidMount() {
-    const user = await Auth.currentAuthenticatedUser();
-    this.setState({ user });
+    const user = await Auth.currentUserInfo();
+    this.setState({ username: user.username });
+    this.setState({ email: user.attributes.email });
+    console.log("USER ID: " + user.id);
   }
 
   signOut = async () => {
     Auth.signOut()
-      .then(() => this.props.navigation.navigate("Auth"))
+      .then(() => {
+        this.props.navigation.navigate("Auth");
+      })
       .catch(err => console.log(err));
   };
 
   render() {
-    let { notify_updates, notify_following, notify_new } = this.state;
+    let {
+      username,
+      email,
+      notify_updates,
+      notify_following,
+      notify_new
+    } = this.state;
     return (
       <ScrollView>
         <ThemeProvider>
@@ -34,13 +45,9 @@ export default class SettingsScreen extends React.Component {
             <View style={{ marginBottom: 20 }}>
               <Text h4>User Profile</Text>
               <Text style={{ margin: 10, fontWeight: "300" }}>Username</Text>
-              <Text style={{ margin: 10, fontWeight: "600" }}>
-                {this.state.user.username}
-              </Text>
+              <Text style={{ margin: 10, fontWeight: "600" }}>{username}</Text>
               <Text style={{ margin: 10, fontWeight: "300" }}>Email</Text>
-              <Text style={{ margin: 10, fontWeight: "600" }}>
-                craig@urbanmarsupial.com
-              </Text>
+              <Text style={{ margin: 10, fontWeight: "600" }}>{email}</Text>
               <Button title="Reset Password" onPress={this.signOut} />
               <Text />
             </View>

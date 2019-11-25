@@ -4,25 +4,11 @@ import { Button, Input, Text, ThemeProvider } from "react-native-elements";
 
 import { Auth } from "aws-amplify";
 
-import StateService from "../services/StateService";
-
 export default class SignInScreen extends React.Component {
   state = {
     username: "",
-    password: ""
-  };
-
-  handleSignOut = () => {
-    StateService.logout();
-    this.setState({
-      username: "",
-      password: ""
-    });
-    this.props.navigation.navigate("Auth");
-  };
-
-  handleNavHome = async () => {
-    this.props.navigation.navigate("Home");
+    password: "",
+    error: {}
   };
 
   handleSignIn = async () => {
@@ -36,10 +22,11 @@ export default class SignInScreen extends React.Component {
     Auth.signIn(username, password)
       .then(user => {
         this.props.navigation.navigate("Home");
-        // StateService.login(user);
-        console.log(user);
       })
-      .catch(err => console.log(err));
+      .catch(error => {
+        console.log(error);
+        this.setState({ error });
+      });
   };
 
   render() {
@@ -49,6 +36,7 @@ export default class SignInScreen extends React.Component {
           <Text h4 style={{ marginBottom: 20, textAlign: "center" }}>
             Sign In
           </Text>
+          <ErrorText error={this.state.error.message} />
           <Input
             autoCapitalize="none"
             autoCompleteType="off"
@@ -77,11 +65,6 @@ export default class SignInScreen extends React.Component {
             onPress={this.handleSignIn}
             buttonStyle={{ marginTop: 30 }}
           />
-          <Button
-            title="Back to App"
-            onPress={this.handleNavHome}
-            buttonStyle={{ marginTop: 30 }}
-          />
         </View>
       </ThemeProvider>
     );
@@ -91,3 +74,7 @@ export default class SignInScreen extends React.Component {
 SignInScreen.navigationOptions = {
   title: "Glass in the Bike Lane"
 };
+
+function ErrorText(props) {
+  return props.error === "" ? null : <Text>{props.error}</Text>;
+}
