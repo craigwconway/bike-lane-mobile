@@ -4,8 +4,6 @@ import { Button, CheckBox, Text, ThemeProvider } from "react-native-elements";
 
 import { Auth } from "aws-amplify";
 
-import { FetchService } from "../services/FetchService";
-
 export default class SettingsScreen extends React.Component {
   state = {
     username: "",
@@ -24,9 +22,7 @@ export default class SettingsScreen extends React.Component {
 
   signOut = async () => {
     Auth.signOut()
-      .then(() => {
-        this.props.navigation.navigate("Auth");
-      })
+      .then(_ => this.props.navigation.navigate("Auth"))
       .catch(err => console.log(err));
   };
 

@@ -20,7 +20,7 @@ import {
   ReportService,
   initialRegion
 } from "../services/ReportService";
-import StateService from "../services/StateService";
+import { StateService } from "../services/StateService";
 
 const MAP_SCALE = 0.001; // MOVE TO CONFIG
 const MARKER_SIZE = 25;
@@ -34,21 +34,16 @@ export default class HomeScreen extends React.Component {
     markers: [],
     markersRef: [],
     overlay: false,
-    region: {},
+    region: initialRegion(),
     report: new Report(),
     reports: [],
-    reportsRef: []
+    reportsRef: [],
+    user: {}
   };
 
-  componentWillMount() {
+  async componentDidMount() {
     this.getLocation();
-    this.getUsername();
   }
-
-  getUsername = async () => {
-    let username = await StateService.get("username");
-    this.setState({ username });
-  };
 
   getLocation = async () => {
     if (Platform.OS === "android" && !Constants.isDevice) {
@@ -60,10 +55,10 @@ export default class HomeScreen extends React.Component {
         alert(
           "To more effectivly use this app, go to Device Settings and enable Location services."
         );
-        this.setState({ region: initialRegion() });
         this.setState({ loading: false });
       } else {
         let location = await Location.getCurrentPositionAsync({});
+        // TODO log location for notifications
         let { latitude, longitude } = location["coords"];
         this.setState({
           region: {
@@ -76,10 +71,21 @@ export default class HomeScreen extends React.Component {
         this.setState({ location: { latitude, longitude } });
         this.setState({ locationEnabled: true });
         this.setState({ loading: false });
-        this.getMarkers(latitude, longitude, MAP_SCALE);
+        this.getMarkers(latitude, longitude, MAP_SCALE, MAP_SCALE);
+        StateService.set("nearby", this.state.markers);
         setTimeout(() => this.showMarkerCallout(), 1000);
       }
     }
+  };
+
+  onRegionChange = regionChange => {
+    this.setState({ region: regionChange });
+    this.getMarkers(
+      regionChange.latitude,
+      regionChange.longitude,
+      regionChange.latitudeDelta,
+      regionChange.longitudeDelta
+    );
   };
 
   showMarkerCallout = () => {
@@ -89,26 +95,23 @@ export default class HomeScreen extends React.Component {
     }
   };
 
-  getMarkers = async (latitude, longitude, distance) => {
-    let markers = await ReportService.findByProximity(
+  getMarkers = async (latitude, longitude, latitudeDelta, longitudeDelta) => {
+    let markers = await ReportService.byLocation(
       latitude,
       longitude,
-      distance
+      latitudeDelta,
+      longitudeDelta
     );
     this.setState({ markers });
   };
 
   handleCreateReport = async () => {
-    let { report, reports, reportsRef, snappedPoints, username } = this.state;
-    // create report
+    let { report, reports, reportsRef, snappedPoints, user } = this.state;
     report.latitude = snappedPoints.latitude;
     report.longitude = snappedPoints.longitude;
-    report.user = username;
-    const result = report.id
-      ? ReportService.update(report)
-      : ReportService.create(report);
-    if (result.error) {
-      alert(result.error);
+    report = await ReportService.post(report);
+    if (report.error) {
+      alert("Oops");
       this.setState({ overlay: false });
     } else {
       // hide overlay and show marker
@@ -171,20 +174,21 @@ export default class HomeScreen extends React.Component {
         <MapView
           style={styles.map}
           region={region}
+          onRegionChange={this.onRegionChange}
           onPress={this.handleMapPress}
         >
           {reports.map((report, i) => (
             <Marker
               key={i}
               ref={ref => this.state.reportsRef.push(ref)}
-              coordinate={report.getMarker().coordinate}
-              title={report.getMarker().title}
-              description={report.getMarker().description}
+              coordinate={report.marker().coordinate}
+              title={report.marker().title}
+              description={report.marker().description}
               onPress={_ => this.handleReportClick(i)}
               pinColor={this.mapPinColor(report.severity)}
             >
               <Ionicons
-                name={Platform.OS === "ios" ? "ios-bicycle" : "md-bicycle"}
+                name={Platform.OS === "ios" ? "ios-warning" : "md-warning"}
                 size={MARKER_SIZE}
                 color={this.mapPinColor(report.severity)}
               />
@@ -195,13 +199,13 @@ export default class HomeScreen extends React.Component {
             <Marker
               key={i}
               ref={ref => this.state.markersRef.push(ref)}
-              coordinate={report.getMarker().coordinate}
-              title={report.getMarker().title}
-              description={report.getMarker().description}
+              coordinate={report.marker().coordinate}
+              title={report.marker().title}
+              description={report.marker().description}
               pinColor={this.mapPinColor(report.severity)}
             >
               <Ionicons
-                name={Platform.OS === "ios" ? "ios-bicycle" : "md-bicycle"}
+                name={Platform.OS === "ios" ? "ios-warning" : "md-warning"}
                 size={MARKER_SIZE}
                 color={this.mapPinColor(report.severity)}
               />

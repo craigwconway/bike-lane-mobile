@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import AppNavigator from "./navigation/AppNavigator";
 
+// import { withAuthenticator } from "aws-amplify-react-native";
 import Amplify from "aws-amplify";
 import aws_exports from "./aws-exports";
 Amplify.configure(aws_exports);
@@ -17,7 +18,7 @@ if (__DEV__) {
   console.log("########################");
 }
 
-export default function App(props) {
+function App(props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
 
   if (!isLoadingComplete && !props.skipLoadingScreen) {
@@ -37,6 +38,9 @@ export default function App(props) {
     );
   }
 }
+
+export default App;
+// export default withAuthenticator(App);
 
 async function loadResourcesAsync() {
   await Promise.all([
