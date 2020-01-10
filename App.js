@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import AppNavigator from "./navigation/AppNavigator";
 
-// import { withAuthenticator } from "aws-amplify-react-native";
+import { withAuthenticator } from "aws-amplify-react-native";
 import Amplify from "aws-amplify";
 import aws_exports from "./aws-exports";
 Amplify.configure(aws_exports);
@@ -39,8 +39,12 @@ function App(props) {
   }
 }
 
-export default App;
-// export default withAuthenticator(App);
+// export default App;
+export default withAuthenticator(App, {
+  signUpConfig: {
+    hiddenDefaults: ["phone_number"]
+  }
+});
 
 async function loadResourcesAsync() {
   await Promise.all([

@@ -48,9 +48,6 @@ export default class ReportsScreen extends React.Component {
     if (this.state.nearby.length > 0) {
       this.setState({ reports: this.state.nearby });
     } else {
-      let reports = await StateService.get("nearby");
-      this.setState({ nearby: reports });
-      this.setState({ reports });
     }
   };
 
@@ -63,13 +60,8 @@ export default class ReportsScreen extends React.Component {
   };
 
   myReports = async () => {
-    if (this.state.myReports.length > 0) {
-      this.setState({ reports: this.state.myReports });
-    } else {
-      let reports = await ReportService.fetchReports();
-      this.setState({ myReports: reports });
-      this.setState({ reports });
-    }
+    let reports = await ReportService.fetchReports();
+    this.setState({ reports });
   };
 
   // TODO Refactor (used in home screen too)

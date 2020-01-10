@@ -45,15 +45,19 @@ export class Report {
 
   static fromJson(json) {
     let r = new Report();
-    r.id = json.id;
-    r.userId = json.userId;
-    r.username = json.username;
-    r.latitude = parseFloat(json.latitude);
-    r.longitude = parseFloat(json.longitude);
-    r.severity = json.severity;
-    r.comment = json.comment;
-    r.created = json.created;
-    r.updated = json.updated;
+    try {
+      r.id = json.id;
+      r.userId = json.userId;
+      r.username = json.username;
+      r.latitude = parseFloat(json.latitude);
+      r.longitude = parseFloat(json.longitude);
+      r.severity = json.severity;
+      r.comment = json.comment;
+      r.created = json.created;
+      r.updated = json.updated;
+    } catch (err) {
+      console.log(err);
+    }
     return r;
   }
 
@@ -91,12 +95,13 @@ export class Comment {
 }
 
 export class ReportService {
-  static HOST = "https://12laz39pv8.execute-api.us-west-2.amazonaws.com/Prod/";
+  static HOST =
+    "https://0jtafcy5k6.execute-api.us-west-2.amazonaws.com/Prod/report/";
 
   static post = async report => {
     auth = await Auth.currentAuthenticatedUser();
     console.log("ReportService.post report: " + JSON.stringify(report));
-    response = await fetch(this.HOST + "report/", {
+    response = await fetch(this.HOST, {
       method: "POST",
       headers: { Authorization: auth.signInUserSession.idToken.jwtToken },
       body: JSON.stringify(report)
@@ -109,7 +114,7 @@ export class ReportService {
   static fetchReports = async () => {
     console.log("ReportService.fetchReports");
     auth = await Auth.currentAuthenticatedUser();
-    const response = await fetch(this.HOST + "report/", {
+    const response = await fetch(this.HOST, {
       method: "GET", // *GET, POST, PUT, DELETE, etc.
       cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
       headers: {
@@ -121,7 +126,9 @@ export class ReportService {
     for (i = 0; i < objects.length; i++) {
       reports.push(Report.fromJson(objects[i]));
     }
-    console.log("ReportService.fetchReports reposonse: " + reports);
+    console.log(
+      "ReportService.fetchReports reposonse: " + JSON.stringify(reports)
+    );
     return reports;
   };
 
@@ -135,8 +142,7 @@ export class ReportService {
     auth = await Auth.currentAuthenticatedUser();
     url =
       this.HOST +
-      "report/" +
-      "?latitude=" +
+      "nearby/?latitude=" +
       latitude +
       "&longitude=" +
       longitude +
@@ -157,7 +163,9 @@ export class ReportService {
     for (i = 0; i < objects.length; i++) {
       reports.push(Report.fromJson(objects[i]));
     }
-    console.log("ReportService.byLocation reposonse: " + reports.length);
+    console.log(
+      "ReportService.byLocation reposonse: " + JSON.stringify(reports)
+    );
     return reports;
   };
 }

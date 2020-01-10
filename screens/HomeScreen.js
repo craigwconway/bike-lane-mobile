@@ -20,7 +20,6 @@ import {
   ReportService,
   initialRegion
 } from "../services/ReportService";
-import { StateService } from "../services/StateService";
 
 const MAP_SCALE = 0.001; // MOVE TO CONFIG
 const MARKER_SIZE = 25;
@@ -42,6 +41,7 @@ export default class HomeScreen extends React.Component {
   };
 
   async componentDidMount() {
+    console.log("componentDidMount");
     this.getLocation();
   }
 
@@ -72,13 +72,12 @@ export default class HomeScreen extends React.Component {
         this.setState({ locationEnabled: true });
         this.setState({ loading: false });
         this.getMarkers(latitude, longitude, MAP_SCALE, MAP_SCALE);
-        StateService.set("nearby", this.state.markers);
         setTimeout(() => this.showMarkerCallout(), 1000);
       }
     }
   };
 
-  onRegionChange = regionChange => {
+  onRegionChange = async regionChange => {
     this.setState({ region: regionChange });
     this.getMarkers(
       regionChange.latitude,
@@ -96,13 +95,16 @@ export default class HomeScreen extends React.Component {
   };
 
   getMarkers = async (latitude, longitude, latitudeDelta, longitudeDelta) => {
-    let markers = await ReportService.byLocation(
+    console.log("getMarkers: ", latitude, longitude);
+    const markers = await ReportService.byLocation(
       latitude,
       longitude,
       latitudeDelta,
       longitudeDelta
     );
-    this.setState({ markers });
+    if (markers && markers.length) {
+      this.setState({ markers });
+    }
   };
 
   handleCreateReport = async () => {
@@ -111,7 +113,7 @@ export default class HomeScreen extends React.Component {
     report.longitude = snappedPoints.longitude;
     report = await ReportService.post(report);
     if (report.error) {
-      alert("Oops");
+      alert("ERROR: handleCreateReport");
       this.setState({ overlay: false });
     } else {
       // hide overlay and show marker
@@ -141,7 +143,7 @@ export default class HomeScreen extends React.Component {
     this.setState({ report });
   };
 
-  handleMapPress = event => {
+  handleMapPress = async event => {
     if (
       event.nativeEvent.action !== "marker-press" &&
       event.nativeEvent.coordinate
